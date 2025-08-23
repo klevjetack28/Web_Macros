@@ -1,0 +1,32 @@
+#include "keys.h"
+
+RokuKeyEntry g_keys[] = {
+    { "home", KEY_HOME },
+    { "rev", KEY_REV },
+    { "fwd", KEY_FWD },
+    { "play", KEY_PLAY },
+    { "select", KEY_SELECT },
+    { "left", KEY_LEFT },
+    { "right", KEY_RIGHT },
+    { "down", KEY_DOWN },
+    { "up", KEY_UP },
+    { "back", KEY_BACK },
+    { "instant_replay", KEY_INSTANT_REPLAY },
+    { "info", KEY_INFO },
+    { "backspace", KEY_BACKSPACE },
+    { "search", KEY_SEARCH },
+    { "enter", KEY_ENTER },
+    { "find_remote", KEY_FIND_REMOTE },
+    { "volume_down", KEY_VOLUME_DOWN },
+    { "volume_mute", KEY_VOLUME_MUTE },
+    { "volume_up", KEY_VOLUME_UP },
+    { "power_off", KEY_POWER_OFF },
+    { "channel_up", KEY_CHANNEL_UP },
+    { "channel_down", KEY_CHANNEL_DOWN },
+    { "input_tuner", KEY_INPUT_TUNER },
+    { "input_hdmi_1", KEY_INPUT_HDMI_1 },
+    { "input_hdmi_2", KEY_INPUT_HDMI_2 },
+    { "input_hdmi_3", KEY_INPUT_HDMI_3 },
+    { "input_hdmi_4", KEY_INPUT_HDMI_4 },
+    { "input_av_1", KEY_INPUT_AV_1 }
+};

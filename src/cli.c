@@ -7,46 +7,61 @@
 typedef enum {
     MAIN_MENU,
     USE_MACROS,
-    DISPLAY_MACROS,
-    SEND_KEY_BY_NAME
+    CREATE_MACROS,
+    EDIT_MACROS,
+    TESTER,
+    SETTINGS
 } UiState;
+
+static UiState state = MAIN_MENU;
+static UiState prev_state = MAIN_MENU;
 
 static void cli_menu(void)
 {
     puts("===== Roku Macros =====");
-    puts("1) Use macros");
-    puts("2) Edit macros");
-    puts("3) Edit keybinds for macros");
-    puts("4) Display macros");
+    puts("1) Use Macros");
+    puts("2) Create Macros");
+    puts("3) Edit Macros");
+    puts("4) Key Tester (send single key)");
+    puts("5) Settings (IP, file path, autosave)");
+    puts("6) Quit");
     fputs("> ", stdout);
 }
 
-void cli_input(void)
+static void cli_set_state(UiState s)
+{
+    prev_state = state;
+    state = s;
+}
+
+static void cli_input(void)
 {
     char c;
-    while (c = getchar())
+    while ((c = getchar()))
     {
-        /*
         switch (c)
         {
             case '1':
-                context.state = USE_MACROS;
+                cli_set_state(USE_MACROS);
                 return;
             case '2':
-                context.state = EDIT_MACROS;
+                cli_set_state(CREATE_MACROS);
                 return;
             case '3':
-                context.state = EDIT_KEYBINDS;
+                cli_set_state(EDIT_MACROS);
                 return;
             case '4':
-                context.state = DISPLAY_MACROS;
+                cli_set_state(TESTER);
+                return;
+            case '5':
+                cli_set_state(SETTINGS);
                 return;
             case '\n':
                 break;
             default:
                 printf("Please enter a numeric value 1-4.\n");
-                display_menu();
-        }*/
+                cli_menu();
+        }
     }
 }
 
@@ -62,29 +77,31 @@ void cli_run(void)
 
     while (1)
     {
-        /*
-        switch (context.state)
+        switch (state)
         {
             case MAIN_MENU:
                 cli_menu();
                 cli_input();
                 break;
             case USE_MACROS:
-                printf("USE MACROS\n");
+                puts("USE MACROS");
+                break;
+            case CREATE_MACROS:
+                puts("CREATE MACROS");
                 break;
             case EDIT_MACROS:
-                printf("EDIT MACROS\n");
+                puts("EDIT MACROS");
                 break;
-            case EDIT_KEYBINDS:
-                printf("EDIT KEYBINDS\n");
+            case TESTER:
+                puts("TESTER");
                 break;
-            case DISPLAY_MACROS:
-                printf("DISPLAY MACROS\n");
+            case SETTINGS:
+                puts("SETTINGS");
                 break;
             default:
                 printf("ERROR DEFAULT SWITCH\n");
                 return 1;
-        }*/
+        }
     // TODO check_exit() somehow find when player wants to exit
 
         macro_play(0);

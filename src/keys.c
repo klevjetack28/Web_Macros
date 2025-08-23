@@ -1,6 +1,6 @@
 #include "keys.h"
 
-RokuKeyEntry g_keys[] = {
+const RokuKeyEntry g_keys[] = {
     { "home", KEY_HOME },
     { "rev", KEY_REV },
     { "fwd", KEY_FWD },

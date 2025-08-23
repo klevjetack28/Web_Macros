@@ -1,8 +1,6 @@
 #ifndef DELAYS_H
 #define DELAYS_H
 
-#include <stddef.h>
-
 typedef enum
 {
     DELAY_250,
@@ -22,15 +20,15 @@ typedef enum
 typedef struct
 {
     const char *name;
-    int code;
-    double value;
+    Delay       code;
+    double      seconds;
 } DelayEntry;
 
 extern const DelayEntry g_delays[DELAY_COUNT];
 
 static inline double delay_seconds(Delay d)
 {
-    return g_delays[d].value;
+    return g_delays[d].seconds;
 }
 
 #endif // DELAYS_H

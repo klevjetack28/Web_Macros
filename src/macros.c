@@ -1,6 +1,12 @@
-#include "macros.h"
+#include <stdio.h>
+#include <unistd.h>
 
-void init_macros(void)
+#include "macros.h"
+#include "ecp.h"
+
+Macro g_macros[NUM_MACROS];
+
+void macro_init(void)
 {
     // TODO read from init txt or json file to read macros
     
@@ -16,33 +22,34 @@ void init_macros(void)
     }
 
     // TODO Macro struct with array of macro, int for length, char* for name ect macros also need a delay with some form of sleep
-    set_macro(0, 0, KEY_HOME, DELAY_3000);
-    set_macro(0, 1, KEY_RIGHT, DELAY_500);
-    set_macro(0, 2, KEY_SELECT, DELAY_7500);
-    set_macro(0, 3, KEY_SELECT, DELAY_3000);
-    set_macro(0, 4, KEY_DOWN, DELAY_500);
-    set_macro(0, 5, KEY_DOWN, DELAY_500);
-    set_macro(0, 6, KEY_DOWN, DELAY_500);
-    set_macro(0, 7, KEY_SELECT, DELAY_2000);
-    set_macro(0, 8, KEY_SELECT, DELAY_500);
-    macros[0].length = 9;
+    macro_set(0, 0, KEY_HOME, DELAY_3000);
+    macro_set(0, 1, KEY_RIGHT, DELAY_500);
+    macro_set(0, 2, KEY_SELECT, DELAY_7500);
+    macro_set(0, 3, KEY_SELECT, DELAY_3000);
+    macro_set(0, 4, KEY_DOWN, DELAY_500);
+    macro_set(0, 5, KEY_DOWN, DELAY_500);
+    macro_set(0, 6, KEY_DOWN, DELAY_500);
+    macro_set(0, 7, KEY_SELECT, DELAY_2000);
+    macro_set(0, 8, KEY_SELECT, DELAY_500);
+    g_macros[0].length = 9;
+    printf("Macro Length Init: %d\n", g_macros[0].length);
 }
 
-void set_macro(int macro_index, int signal_index, RokuKey key, Delay delay)
+void macro_set(int macro_index, int signal_index, RokuKey key, Delay delay)
 {
-    macros[macro_index].signals[signal_index].key = key;
-    macros[macro_index].signals[signal_index].delay = delay;
+    g_macros[macro_index].signals[signal_index].key = key;
+    g_macros[macro_index].signals[signal_index].delay = delay;
 }
 
-void play_macro(int macro_index)
+void macro_play(int macro_index)
 {
-    int length = macros[macro_index].length;
-    printf("Macro Length: %d\n", length);
+    int length = g_macros[macro_index].length;
     for (int i = 0; i < length; i++)
     {
-        RokuKey key = macros[macro_index].signals[i].key;
-        send_keypress(keys[key].name);
-        Delay delay = macros[macro_index].signals[i].delay;
-        sleep(delays[delay].value);
+        RokuKey key = g_macros[macro_index].signals[i].key;
+        ecp_keypress(key_name(key));
+        Delay delay = g_macros[macro_index].signals[i].delay;
+        sleep(delay_seconds(delay));
+        printf("Playing Macro %d, Current Keypress %s, With Delay %f\n", macro_index, key_name(key), delay_seconds(delay));
     }
 }

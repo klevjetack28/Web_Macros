@@ -22,6 +22,22 @@ static void cli_set_state(UiState s)
     state = s;
 }
 
+static int cli_to_decimal(const char *buff)
+{
+    int v1 = buff[0] - '0';
+    int v2 = buff[1] - '0';
+    if (v1 > 9 || v1 < 0 || buff[0] == '\0')
+    {
+        return -1;
+    }
+    if (v2 > 9 || v2 < 0 || buff[1] == '\0')
+    {
+        return -1;
+    }
+    int n = (v1 * 10) + v2;
+    return (n < NUM_MACROS) ? n : -1;
+}
+
 static void trim_str(char *s)
 {
     size_t n = strlen(s);
@@ -97,7 +113,15 @@ static void cli_create_macros(void)
 
 static void cli_input_use_macros(void)
 {
-    
+    char buff[2];
+    cli_get_input(buff, sizeof buff, "> ");
+    int index = cli_to_decimal(buff);
+    if (index == -1)
+    {
+        puts("Invalid Macro");
+        return;
+    }
+    macro_play(index);
 }
 
 static void cli_use_macros(void)

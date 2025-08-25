@@ -16,6 +16,65 @@ typedef enum {
 static UiState state = MAIN_MENU;
 static UiState prev_state = MAIN_MENU;
 
+static void cli_set_state(UiState s)
+{
+    prev_state = state;
+    state = s;
+}
+
+static void cli_settings(void)
+{
+    
+}
+
+static void cli_tester(void)
+{
+    
+}
+
+static void cli_edit_macros(void)
+{
+    
+}
+
+static void cli_create_macros(void)
+{
+    
+}
+
+
+
+static void cli_use_macros(void)
+{
+    
+}
+
+static void cli_input_menu(char c)
+{
+    switch (c)
+    {
+        case '1':
+            cli_set_state(USE_MACROS);
+            return;
+        case '2':
+            cli_set_state(CREATE_MACROS);
+            return;
+        case '3':
+            cli_set_state(EDIT_MACROS);
+            return;
+        case '4':
+            cli_set_state(TESTER);
+            return;
+        case '5':
+            cli_set_state(SETTINGS);
+            return;
+        case '\n':
+            break;
+        default:
+            printf("Please enter a numeric value 1-4.\n");
+    }
+}
+
 static void cli_menu(void)
 {
     puts("===== Roku Macros =====");
@@ -28,50 +87,13 @@ static void cli_menu(void)
     fputs("> ", stdout);
 }
 
-static void cli_set_state(UiState s)
-{
-    prev_state = state;
-    state = s;
-}
-
-static void cli_input(void)
-{
-    char c;
-    while ((c = getchar()))
-    {
-        switch (c)
-        {
-            case '1':
-                cli_set_state(USE_MACROS);
-                return;
-            case '2':
-                cli_set_state(CREATE_MACROS);
-                return;
-            case '3':
-                cli_set_state(EDIT_MACROS);
-                return;
-            case '4':
-                cli_set_state(TESTER);
-                return;
-            case '5':
-                cli_set_state(SETTINGS);
-                return;
-            case '\n':
-                break;
-            default:
-                printf("Please enter a numeric value 1-4.\n");
-                cli_menu();
-        }
-    }
-}
-
 static void cli_loop(void)
 {
     switch (state)
     {
         case MAIN_MENU:
             cli_menu();
-            cli_input();
+            cli_input_menu(getchar());
             break;
         case USE_MACROS:
             puts("USE MACROS");

@@ -65,7 +65,39 @@ static void cli_input(void)
     }
 }
 
-static void cli_setup(void)
+static void cli_loop(void)
+{
+    switch (state)
+    {
+        case MAIN_MENU:
+            cli_menu();
+            cli_input();
+            break;
+        case USE_MACROS:
+            puts("USE MACROS");
+            break;
+        case CREATE_MACROS:
+            puts("CREATE MACROS");
+            break;
+        case EDIT_MACROS:
+            puts("EDIT MACROS");
+            break;
+        case TESTER:
+            puts("TESTER");
+            break;
+        case SETTINGS:
+            puts("SETTINGS");
+            break;
+        default:
+            printf("ERROR DEFAULT SWITCH\n");
+            return 1;
+    }
+    // TODO check_exit() somehow find when player wants to exit
+
+    macro_play(0);
+}
+
+void cli_init(void)
 {
     ecp_init("");
     macro_init();
@@ -73,37 +105,8 @@ static void cli_setup(void)
 
 void cli_run(void)
 {
-    cli_setup();
-
     while (1)
     {
-        switch (state)
-        {
-            case MAIN_MENU:
-                cli_menu();
-                cli_input();
-                break;
-            case USE_MACROS:
-                puts("USE MACROS");
-                break;
-            case CREATE_MACROS:
-                puts("CREATE MACROS");
-                break;
-            case EDIT_MACROS:
-                puts("EDIT MACROS");
-                break;
-            case TESTER:
-                puts("TESTER");
-                break;
-            case SETTINGS:
-                puts("SETTINGS");
-                break;
-            default:
-                printf("ERROR DEFAULT SWITCH\n");
-                return 1;
-        }
-    // TODO check_exit() somehow find when player wants to exit
-
-        macro_play(0);
+        cli_loop();
     }
 }

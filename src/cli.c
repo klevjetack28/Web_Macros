@@ -16,7 +16,12 @@ typedef enum {
 static UiState state = MAIN_MENU;
 static UiState prev_state = MAIN_MENU;
 
-// trim function char*
+static void cli_set_state(UiState s)
+{
+    prev_state = state;
+    state = s;
+}
+
 static void trim_str(char *s)
 {
     size_t n = strlen(s);
@@ -37,7 +42,6 @@ static void trim_str(char *s)
     }
 }
 
-// get input function char* buff int buflen const char* prompt
 static void cli_get_input(char* buff, size_t bufflen, const char *prompt)
 {
     fputs(prompt, stdout);
@@ -49,13 +53,6 @@ static void cli_get_input(char* buff, size_t bufflen, const char *prompt)
     }
     
     trim_str(buff);
-}
-
-
-static void cli_set_state(UiState s)
-{
-    prev_state = state;
-    state = s;
 }
 
 static void cli_input_settings(void)

@@ -16,6 +16,10 @@ typedef enum {
 static UiState state = MAIN_MENU;
 static UiState prev_state = MAIN_MENU;
 
+// trim function char*
+
+// get input function char* buff int buflen const char* prompt
+
 static void cli_set_state(UiState s)
 {
     prev_state = state;
@@ -111,7 +115,6 @@ static void cli_menu(void)
     puts("4) Key Tester (send single key)");
     puts("5) Settings (IP, file path, autosave)");
     puts("6) Quit");
-    fputs("> ", stdout);
 }
 
 static void cli_loop(void)

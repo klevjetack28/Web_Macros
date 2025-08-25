@@ -22,7 +22,17 @@ static void cli_set_state(UiState s)
     state = s;
 }
 
+static void cli_input_settings(void)
+{
+    
+}
+
 static void cli_settings(void)
+{
+    
+}
+
+static void cli_input_tester(void)
 {
     
 }
@@ -32,7 +42,17 @@ static void cli_tester(void)
     
 }
 
+static void cli_input_edit_macros(void)
+{
+    
+}
+
 static void cli_edit_macros(void)
+{
+    
+}
+
+static void cli_input_create_macros(void)
 {
     
 }
@@ -42,11 +62,18 @@ static void cli_create_macros(void)
     
 }
 
-
+static void cli_input_use_macros(void)
+{
+    
+}
 
 static void cli_use_macros(void)
 {
-    
+    puts("===== USE MACROS =====");
+    for (int i = 0; i < NUM_MACROS; i++)
+    {
+        printf("%d) %s", i + 1, g_macros[i].name);
+    }
 }
 
 static void cli_input_menu(char c)

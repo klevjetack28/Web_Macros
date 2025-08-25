@@ -17,8 +17,40 @@ static UiState state = MAIN_MENU;
 static UiState prev_state = MAIN_MENU;
 
 // trim function char*
+static void trim_str(char *s)
+{
+    size_t n = strlen(s);
+    while (n && (s[n - 1] == '\n' || s[n - 1] == '\0' || isspace(s[n - 1])))
+    {
+        s[--n] = '\0';
+    }
+    
+    size_t = 0;
+    while (s[i] && isspace(s[i]))
+    {
+        i++;
+    }
+    
+    if (i)
+    {
+        memmove(s, s + 1, strlen(s + i) + 1);
+    }
+}
 
 // get input function char* buff int buflen const char* prompt
+static void cli_get_input(char* buff, size_t bufflen, const char *prompt)
+{
+    fputs(prompt, stdout);
+    fflush(stdout);
+    
+    if (!fgets(buff, bufflen, stdin))
+    {
+        return;
+    }
+    
+    trim_str(buff);
+}
+
 
 static void cli_set_state(UiState s)
 {

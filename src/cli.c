@@ -128,7 +128,13 @@ static void menu_delay(void)
 
 static void menu_signal(void)
 {
-   // Print the signals 
+   // Print the signals
+    puts("===== SIGNALS =====");
+    for (int i = 0; i < NUM_KEYS; i++)
+    {
+        printf("%d) %s", i + 1, g_keys[i].name);
+    }
+    puts("Type 'b' to go back.");
 }
 
 static void menu_select_signal(void)

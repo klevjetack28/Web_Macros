@@ -6,6 +6,20 @@
 #include "macros.h"
 #include "cli.h"
 
+typedef enum 
+{
+    MAIN,
+    CREATE,
+    EDIT,
+    SELECT_MACRO
+    NAME,
+    SELECT_SIGNAL
+    SIGNAL,
+    DELAY
+} EditPhase;
+
+static EditPhase phase = MAIN;
+
 typedef enum {
     MAIN_MENU,
     USE_MACROS,
@@ -118,12 +132,80 @@ static void cli_input_create_macros(void)
     
 }
 
-static void cli_create_macros(void)
+static void menu_delay(void)
+{
+    
+}
+
+static void menu_signal(void)
+{
+    
+}
+
+static void menu_select_signal(void)
+{
+    
+}
+
+static void menu_name(void)
+{
+    
+}
+
+static void menu_create(void)
+{
+    
+}
+
+static void menu_select_macro(void)
+{
+    
+}
+
+static void menu_edit(void)
+{
+    
+}
+
+static void menu_main(void)
 {
     puts("===== CREATE MACROS =====");
     puts("Create a new macro press 'c'");
+    puts("Edit an existing macro press 'e'");
     puts("Press 'b' to go back");
-    puts("Edit a macro by pressing 'e'");
+}
+
+static void cli_create_macros(void)
+{
+    switch (phase)
+    {
+        case MAIN:
+            menu_main();
+            break;
+        case EDIT:
+            medu_edit();
+            break;
+        case SELECT_MACRO:
+            menu_select_macro();
+            break;
+        case CREATE:
+            menu_create();
+            break;
+        case NAME:
+            menu_name();
+            break;
+        case SELECT_SIGNAL:
+            menu_select_signal();
+            break;
+        case SIGNAL:
+            menu_signal();
+            break;
+        case DELAY:
+            menu_delay();
+            break;
+        default:
+            puts("SOMETHING WENT WRONG IN CREATE/EDIT MACRO!!!! SEND HELP!!!");
+    }
 }
 
 static void cli_input_use_macros(void)

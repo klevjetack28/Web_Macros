@@ -148,7 +148,7 @@ static void menu_input_delay(void)
     int n = cli_to_decimal_2_digit(c);
     if (n < DELAY_COUNT && n >= 0)
     {
-        macros_set_delay(g_index, g_signal_index, n);
+        macros_set_delay(g_index, g_signal_index, g_delays[n].code);
     }
 }
 
@@ -176,7 +176,7 @@ static void menu_input_signal(void)
     int n = cli_to_decimal_2_digit(c);
     if (n < KEY_COUNT && n >= 0)
     {
-        macros_set_key(g_index, g_signal_index, n);
+        macros_set_key(g_index, g_signal_index, g_keys[n].code);
     }
 }
 

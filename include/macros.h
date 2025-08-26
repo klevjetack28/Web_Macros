@@ -28,6 +28,8 @@ extern int g_num_macros;
 
 void macro_init(void);
 void macro_set(int macro_index, int signal_index, RokuKey key, Delay delay);
+void macro_set_delay(int macro_index, int_signal_index, Delay d);
+void macro_set_key(int macro_index, int signal_index, RokuKey k);
 void macro_play(int macro_index);
 
 #endif // MACROS_H

@@ -5,6 +5,7 @@
 #include "ecp.h"
 
 Macro g_macros[NUM_MACROS];
+int g_num_macros = 0;
 
 void macro_init(void)
 {
@@ -32,6 +33,8 @@ void macro_init(void)
     macro_set(0, 7, KEY_SELECT, DELAY_2000);
     macro_set(0, 8, KEY_SELECT, DELAY_500);
     g_macros[0].length = 9;
+    g_macros[0].name = "MACRO 1";
+    g_num_macros++;
     printf("Macro Length Init: %d\n", g_macros[0].length);
 }
 

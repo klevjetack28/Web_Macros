@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 
 #include "ecp.h"
 #include "macros.h"
@@ -11,12 +13,12 @@ typedef enum {
     EDIT_MACROS,
     TESTER,
     SETTINGS
-} UiState;
+} CliState;
 
-static UiState state = MAIN_MENU;
-static UiState prev_state = MAIN_MENU;
+static CliState state = MAIN_MENU;
+static CliState prev_state = MAIN_MENU;
 
-static void cli_set_state(UiState s)
+static void cli_set_state(CliState s)
 {
     prev_state = state;
     state = s;
@@ -26,16 +28,26 @@ static int cli_to_decimal(const char *buff)
 {
     int v1 = buff[0] - '0';
     int v2 = buff[1] - '0';
-    if (v1 > 9 || v1 < 0 || buff[0] == '\0')
+    if (v1 > 9 || v1 < 0)
     {
         return -1;
     }
-    if (v2 > 9 || v2 < 0 || buff[1] == '\0')
+    if (buff[1] != '\0')
     {
-        return -1;
+        if (v2 > 9 || v2 < 0)
+        {
+            return -1;
+        }
     }
-    int n = (v1 * 10) + v2;
-    return (n < NUM_MACROS) ? n : -1;
+    if (buff[1] == '\0')
+    {
+        return v1;
+    } 
+    else
+    {
+        int n = (v1 * 10) + v2;
+        return (n < NUM_MACROS) ? n : -1;
+    }
 }
 
 static void trim_str(char *s)
@@ -46,7 +58,7 @@ static void trim_str(char *s)
         s[--n] = '\0';
     }
     
-    size_t = 0;
+    size_t i = 0;
     while (s[i] && isspace(s[i]))
     {
         i++;
@@ -108,34 +120,44 @@ static void cli_input_create_macros(void)
 
 static void cli_create_macros(void)
 {
-    
+    puts("===== CREATE MACROS =====");
+    puts("Create a new macro press 'c'");
+    puts("Press 'b' to go back");
+    puts("Edit a macro by pressing 'e'");
 }
 
 static void cli_input_use_macros(void)
 {
-    char buff[2];
-    cli_get_input(buff, sizeof buff, "> ");
+    char buff[8];
+    cli_get_input(buff, sizeof(buff), "> ");
+    if (buff[0] == 'b')
+    {
+        cli_set_state(prev_state);
+    }
     int index = cli_to_decimal(buff);
     if (index == -1)
     {
         puts("Invalid Macro");
         return;
     }
-    macro_play(index);
+    macro_play(index - 1);
 }
 
 static void cli_use_macros(void)
 {
     puts("===== USE MACROS =====");
-    for (int i = 0; i < NUM_MACROS; i++)
+    for (int i = 0; i < g_num_macros; i++)
     {
-        printf("%d) %s", i + 1, g_macros[i].name);
+        printf("%d) %s\n", i + 1, g_macros[i].name);
     }
+    puts("Enter 'b' to go back");
 }
 
-static void cli_input_menu(char c)
+static void cli_input_menu()
 {
-    switch (c)
+    char c[8];
+    cli_get_input(c, sizeof(c), "> ");
+    switch (c[0])
     {
         case '1':
             cli_set_state(USE_MACROS);
@@ -176,10 +198,11 @@ static void cli_loop(void)
     {
         case MAIN_MENU:
             cli_menu();
-            cli_input_menu(getchar());
+            cli_input_menu();
             break;
         case USE_MACROS:
-            puts("USE MACROS");
+            cli_use_macros();
+            cli_input_use_macros();
             break;
         case CREATE_MACROS:
             puts("CREATE MACROS");
@@ -195,11 +218,8 @@ static void cli_loop(void)
             break;
         default:
             printf("ERROR DEFAULT SWITCH\n");
-            return 1;
+            return;
     }
-    // TODO check_exit() somehow find when player wants to exit
-
-    macro_play(0);
 }
 
 void cli_init(void)

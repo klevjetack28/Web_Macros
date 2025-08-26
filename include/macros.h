@@ -21,6 +21,7 @@ typedef struct
 } Macro;
 
 extern Macro g_macros[NUM_MACROS];
+extern int g_num_macros;
 
 void macro_init(void);
 void macro_set(int macro_index, int signal_index, RokuKey key, Delay delay);

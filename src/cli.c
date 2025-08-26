@@ -23,8 +23,7 @@ static EditPhase phase = MAIN;
 typedef enum {
     MAIN_MENU,
     USE_MACROS,
-    CREATE_MACROS,
-    EDIT_MACROS,
+    CREATE_EDIT_MACROS,
     TESTER,
     SETTINGS
 } CliState;
@@ -117,62 +116,73 @@ static void cli_tester(void)
     
 }
 
-static void cli_input_edit_macros(void)
-{
-    
-}
-
-static void cli_edit_macros(void)
-{
-    
-}
-
-static void cli_input_create_macros(void)
+static void cli_input_create_edit_macros(void)
 {
     
 }
 
 static void menu_delay(void)
 {
-    
+    // Print the delays
 }
 
 static void menu_signal(void)
 {
-    
+   // Print the signals 
 }
 
 static void menu_select_signal(void)
 {
-    
+    puts("===== SELECT SIGNAL =====");
+    for (int i = 0; i < MACRO_LENGTH; i++)
+    {
+        macro_print_signal(g_macro[index].signals[i]);
+    }
+    puts("Type 'b' to go back.");
 }
 
 static void menu_name(void)
 {
-    
+    puts("===== SET NAME =====");
+    if (g_macros[index].create)
+    {
+        printf("Current Name: %s", g_macros[index].name);
+    } 
+    else
+    {
+        printf("Default Name: %s%d", g_macros[index].name, g_num_macros); 
+    }
+    puts("Type a new name and press Enter.");
+    puts("Press Enter with nothing to keep current (or use default on Create).");
+    puts("Type 'b' to go back."); 
 }
 
 static void menu_create(void)
 {
-    
+    // ??
 }
 
 static void menu_select_macro(void)
 {
-    
+    puts("===== SELECT MACRO =====");
+    for (int i = 0; i < g_num_macros; i++)
+    {
+        printf("%d) %s\n", i + 1, g_macros[i].name);
+    }
+    puts("Type 'b' to go back.");
 }
 
 static void menu_edit(void)
 {
-    
+    // ???
 }
 
 static void menu_main(void)
 {
-    puts("===== CREATE MACROS =====");
-    puts("Create a new macro press 'c'");
-    puts("Edit an existing macro press 'e'");
-    puts("Press 'b' to go back");
+    puts("===== CREATE/EDIT MACROS =====");
+    puts("Create a new macro press 'c'.");
+    puts("Edit an existing macro press 'e'.");
+    puts("Type 'b' to go back.");
 }
 
 static void cli_create_macros(void)
@@ -232,7 +242,7 @@ static void cli_use_macros(void)
     {
         printf("%d) %s\n", i + 1, g_macros[i].name);
     }
-    puts("Enter 'b' to go back");
+    puts("Type 'b' to go back.");
 }
 
 static void cli_input_menu()
@@ -245,15 +255,12 @@ static void cli_input_menu()
             cli_set_state(USE_MACROS);
             return;
         case '2':
-            cli_set_state(CREATE_MACROS);
+            cli_set_state(CREATE_EDIT_MACROS);
             return;
         case '3':
-            cli_set_state(EDIT_MACROS);
-            return;
-        case '4':
             cli_set_state(TESTER);
             return;
-        case '5':
+        case '4':
             cli_set_state(SETTINGS);
             return;
         case '\n':
@@ -267,11 +274,10 @@ static void cli_menu(void)
 {
     puts("===== Roku Macros =====");
     puts("1) Use Macros");
-    puts("2) Create Macros");
-    puts("3) Edit Macros");
-    puts("4) Key Tester (send single key)");
-    puts("5) Settings (IP, file path, autosave)");
-    puts("6) Quit");
+    puts("2) Create/Edit Macros");
+    puts("3) Key Tester (send single key)");
+    puts("4) Settings (IP, file path, autosave)");
+    puts("q) Quit");
 }
 
 static void cli_loop(void)
@@ -286,11 +292,8 @@ static void cli_loop(void)
             cli_use_macros();
             cli_input_use_macros();
             break;
-        case CREATE_MACROS:
+        case CREATE_EDIT_MACROS:
             puts("CREATE MACROS");
-            break;
-        case EDIT_MACROS:
-            puts("EDIT MACROS");
             break;
         case TESTER:
             puts("TESTER");

@@ -1,6 +1,8 @@
 #ifndef MACROS_H
 #define MACROS_H
 
+#include <stdbool.h>
+
 #include "keys.h"
 #include "delays.h"
 
@@ -17,6 +19,7 @@ typedef struct
 {
     Signal signals[MACRO_LENGTH];
     int length;
+    bool created;
     const char *name;
 } Macro;
 

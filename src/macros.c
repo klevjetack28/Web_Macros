@@ -34,6 +34,7 @@ void macro_init(void)
     macro_set(0, 8, KEY_SELECT, DELAY_500);
     g_macros[0].length = 9;
     g_macros[0].name = "MACRO 1";
+    g_macros[0].create = true;
     g_num_macros++;
     printf("Macro Length Init: %d\n", g_macros[0].length);
 }

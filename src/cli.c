@@ -131,7 +131,13 @@ static void cli_input_tester(void)
 
 static void cli_tester(void)
 {
+    puts("===== KEY TESTER =====");
+    puts("Used to see functionality of key and teluje delays.");
     
+    //print key values
+    
+    puts("Type the key index and delay index to test a key.");
+    puts("Type 'b' to go back.");
 }
 
 static void menu_input_delay(void)

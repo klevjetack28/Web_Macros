@@ -39,10 +39,20 @@ void macro_init(void)
     printf("Macro Length Init: %d\n", g_macros[0].length);
 }
 
-void macro_set(int macro_index, int signal_index, RokuKey key, Delay delay)
+void macro_set(int macro_index, int signal_index, RokuKey k, Delay d)
 {
-    g_macros[macro_index].signals[signal_index].key = key;
-    g_macros[macro_index].signals[signal_index].delay = delay;
+    g_macros[macro_index].signals[signal_index].key = k;
+    g_macros[macro_index].signals[signal_index].delay = d;
+}
+
+void macro_set_delay(int macro_index, int signal_index, Delay d)
+{
+    g_macros[macro_index].signals[signal_index].delay = d;
+}
+
+void macro_set_key(int macro_index, int signal_index, RokuKey k)
+{
+    g_macros[macro_index].signals[signal_index].key = k;
 }
 
 void macro_play(int macro_index)

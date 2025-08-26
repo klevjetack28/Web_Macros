@@ -136,11 +136,6 @@ static void cli_tester(void)
 
 static void menu_input_delay(void)
 {
-    
-}
-
-static void menu_input_delay(void)
-{
     char c[8];
     cli_get_input(c, sizeof(c), "> ");
     

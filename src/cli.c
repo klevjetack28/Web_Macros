@@ -29,7 +29,8 @@ typedef enum
 static Action g_action = NONE;
 
 static int g_index = -1;
-static Macro temp_macro; // maybe??
+static int g_signal_index = -1;
+static Macro temp_macro; // used if canceled mid edit copies original into it and if canceled copues original back
 
 typedef enum {
     MAIN_MENU,
@@ -133,6 +134,29 @@ static void cli_tester(void)
     
 }
 
+static void menu_input_delay(void)
+{
+    
+}
+
+static void menu_input_delay(void)
+{
+    char c[8];
+    cli_get_input(c, sizeof(c), "> ");
+    
+    if (c[0] == 'b')
+    {
+        menu_set_phase(prev_phase);
+        return;
+    }
+    
+    int n = cli_to_decimal_2_digit(c);
+    if (n < DELAY_COUNT && n >= 0)
+    {
+        g_macros[g_index].signals[g_signal_index].delay = g_delays[n];
+    }
+}
+
 static void menu_delay(void)
 {
     puts("===== DELAYS =====");
@@ -141,6 +165,24 @@ static void menu_delay(void)
         printf("%d) %s", i + 1, g_delays[i].name);
     }
     puts("Type 'b' to go back.");
+}
+
+static void menu_input_signal(void)
+{
+    char c[8];
+    cli_get_input(c, sizeof(c), "> ");
+    
+    if (c[0] == 'b')
+    {
+        menu_set_phase(prev_phase);
+        return;
+    }
+    
+    int n = cli_to_decimal_2_digit(c);
+    if (n < KEY_COUNT && n >= 0)
+    {
+        g_macros[g_index].signals[g_signal_index].key = g_keys[n];
+    }
 }
 
 static void menu_signal(void)
@@ -153,6 +195,25 @@ static void menu_signal(void)
     puts("Type 'b' to go back.");
 }
 
+static void menu_input_select_signal(void)
+{
+    char c[8];
+    cli_get_input(c, sizeof(c), "> ");
+    
+    if (c[0] == 'b')
+    {
+        menu_set_phase(prev_phase);
+        return;
+    }
+    
+    int n = cli_to_decimal_2_digit(c);
+    
+    if (n < g_macros[g_index].length && n >= 0)
+    {
+        g_signal_index = n;
+    }
+}
+
 static void menu_select_signal(void)
 {
     puts("===== SELECT SIGNAL =====");
@@ -160,6 +221,8 @@ static void menu_select_signal(void)
     {
         macro_print_signal(g_macro[index].signals[i]);
     }
+    puts("Type 'a' to add a signal.");
+    puts("Type 'i' followed by a valid index to insert.");
     puts("Type 'b' to go back.");
 }
 
@@ -271,18 +334,23 @@ static void cli_create_edit_macros(void)
             break;
         case SELECT_MACRO:
             menu_select_macro();
+            menu_input_select_macro();
             break;
         case NAME:
             menu_name();
+            menu_input_name();
             break;
         case SELECT_SIGNAL:
             menu_select_signal();
+            menu_input_select_signal();
             break;
         case SIGNAL:
             menu_signal();
+            menu_input_signal();
             break;
         case DELAY:
             menu_delay();
+            menu_input_delag();
             break;
         default:
             puts("SOMETHING WENT WRONG IN CREATE/EDIT MACRO!!!! SEND HELP!!!");

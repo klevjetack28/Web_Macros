@@ -9,8 +9,6 @@
 typedef enum 
 {
     MAIN,
-    CREATE,
-    EDIT,
     SELECT_MACRO
     NAME,
     SELECT_SIGNAL
@@ -18,7 +16,20 @@ typedef enum
     DELAY
 } EditPhase;
 
-static EditPhase phase = MAIN;
+static EditPhase g_phase = MAIN;
+static EditOhase g_prev_phase = MAIN;
+
+typedef enum
+{
+    CREATE,
+    EDIT,
+    NONE
+} Action;
+
+static Action g_action = NONE;
+
+static int g_index = -1;
+static Macro temp_macro; // maybe??
 
 typedef enum {
     MAIN_MENU,
@@ -37,7 +48,13 @@ static void cli_set_state(CliState s)
     state = s;
 }
 
-static int cli_to_decimal(const char *buff)
+static void menu_set_phase(EditPhase p)
+{
+    g_prev_phase = g_phase;
+    g_phase = p;
+}
+
+static int cli_to_decimal_2_digit(const char *buff)
 {
     int v1 = buff[0] - '0';
     int v2 = buff[1] - '0';
@@ -116,21 +133,20 @@ static void cli_tester(void)
     
 }
 
-static void cli_input_create_edit_macros(void)
-{
-    
-}
-
 static void menu_delay(void)
 {
-    // Print the delays
+    puts("===== DELAYS =====");
+    for (int i = 0; i < DELAY_COUNT; i++)
+    {
+        printf("%d) %s", i + 1, g_delays[i].name);
+    }
+    puts("Type 'b' to go back.");
 }
 
 static void menu_signal(void)
 {
-   // Print the signals
     puts("===== SIGNALS =====");
-    for (int i = 0; i < NUM_KEYS; i++)
+    for (int i = 0; i < KEY_COUNT; i++)
     {
         printf("%d) %s", i + 1, g_keys[i].name);
     }
@@ -147,25 +163,60 @@ static void menu_select_signal(void)
     puts("Type 'b' to go back.");
 }
 
+static coid menu_input_name(void)
+{
+    char str[64];
+    cli_get_input(str, sizeof(str), "> ");
+    if (str[0] == 'b' && str[1] == '\0')
+    {
+        menu_set_phase(g_prev_phase);
+        return;
+    }
+    if (str[0] != '\0')
+        g_macros[g_index].name = str;
+    }
+    menu_set_phase(SELECT_SIGNAL);
+}
+
 static void menu_name(void)
 {
     puts("===== SET NAME =====");
     if (g_macros[index].create)
     {
-        printf("Current Name: %s", g_macros[index].name);
+        printf("Current Name: %s", g_macros[g_index].name);
     } 
     else
     {
-        printf("Default Name: %s%d", g_macros[index].name, g_num_macros); 
+        printf("Default Name: MACRO%d", g_num_macros); 
     }
     puts("Type a new name and press Enter.");
     puts("Press Enter with nothing to keep current (or use default on Create).");
     puts("Type 'b' to go back."); 
 }
 
-static void menu_create(void)
+static void menu_input_select_macro(void)
 {
-    // ??
+    char c[8];
+    cli_get_input(c, sizeof(c), "> ");
+    
+    if (c[0] == 'b')
+    {
+        menu_set_phase(g_prev_phase);
+        return;
+    }
+    
+    int index = cli_to_decimal_2_digit(c);
+    
+    if (index <= g_num_macros && index > 0)
+    {
+        g_index = index;
+        menu_set_phase(NAME);
+    }
+    else
+    {
+        puts("Select a valid macro to edit.");
+        menu_input_select_macro();
+    }
 }
 
 static void menu_select_macro(void)
@@ -178,9 +229,28 @@ static void menu_select_macro(void)
     puts("Type 'b' to go back.");
 }
 
-static void menu_edit(void)
+static menu_input_main(void)
 {
-    // ???
+    char c[8];
+    cli_get_input(c, sizeof(c), "> ");
+    
+    switch (c[0])
+    {
+        case 'c':
+            menu_set_phase(NAME);
+            action = CREATE;
+            break;
+        case 'e':
+            menu_set_phase(SELECT_MACRO);
+            action = EDIT;
+            break;
+        case 'b':
+            cli_set_state(prev_state);
+            break;
+        default:
+            puts("Invalid Option Try Again");
+            menu_input_main();
+    }
 }
 
 static void menu_main(void)
@@ -191,21 +261,16 @@ static void menu_main(void)
     puts("Type 'b' to go back.");
 }
 
-static void cli_create_macros(void)
+static void cli_create_edit_macros(void)
 {
     switch (phase)
     {
         case MAIN:
             menu_main();
-            break;
-        case EDIT:
-            medu_edit();
+            menu_input_main();
             break;
         case SELECT_MACRO:
             menu_select_macro();
-            break;
-        case CREATE:
-            menu_create();
             break;
         case NAME:
             menu_name();
@@ -232,7 +297,7 @@ static void cli_input_use_macros(void)
     {
         cli_set_state(prev_state);
     }
-    int index = cli_to_decimal(buff);
+    int index = cli_to_decimal_2_digit(buff);
     if (index == -1)
     {
         puts("Invalid Macro");

@@ -42,8 +42,7 @@ typedef enum {
     MAIN_MENU,
     USE_MACROS,
     CREATE_EDIT_MACROS,
-    TESTER,
-    SETTINGS
+    TESTER
 } CliState;
 
 static CliState state = MAIN_MENU;
@@ -136,19 +135,30 @@ static void menu_print_keys()
     }
 }
 
-static void cli_input_settings(void)
-{
-    
-}
-
-static void cli_settings(void)
-{
-    
-}
-
 static void menu_input_tester_options(void)
 {
+    char c[8];
+    cli_get_input(c, sizeof(c), "> ");
     
+    switch (c[0])
+    {
+        case 'p':
+            ecp_keypress(g_keys[key_index].name);
+            sleep(g_delay[delay_index].seconds);
+            break;
+        case 'd':
+            test_phase = DELAY;
+            break;
+        case 'r':
+            test_phase = SIGNAL;
+            break;
+        case 'q':
+            cli_set_state(MAIN_MENU);
+            break;
+        default:
+            puts("Invalid Input");
+            menu_input_tester_options();
+    }
 }
 
 static void menu_input_tester(void)
@@ -414,6 +424,7 @@ static void cli_use_macros(void)
         printf("%d) %s\n", i + 1, g_macros[i].name);
     }
     puts("Type 'b' to go back.");
+    cli_input_use_macros();
 }
 
 static void cli_input_menu()
@@ -449,6 +460,7 @@ static void cli_menu(void)
     puts("3) Key Tester (send single key)");
     puts("4) Settings (IP, file path, autosave)");
     puts("q) Quit");
+    cli_input_menu();
 }
 
 static void cli_loop(void)
@@ -457,20 +469,15 @@ static void cli_loop(void)
     {
         case MAIN_MENU:
             cli_menu();
-            cli_input_menu();
             break;
         case USE_MACROS:
             cli_use_macros();
-            cli_input_use_macros();
             break;
         case CREATE_EDIT_MACROS:
-            puts("CREATE MACROS");
+            cli_create_edit_macros();
             break;
         case TESTER:
-            puts("TESTER");
-            break;
-        case SETTINGS:
-            puts("SETTINGS");
+            cli_tester();
             break;
         default:
             printf("ERROR DEFAULT SWITCH\n");

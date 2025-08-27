@@ -6,10 +6,18 @@
 #include "macros.h"
 #include "cli.h"
 
+typedef enum
+{
+    SIGNAL,
+    DELAY,
+    TESTING,
+} TesterPhase;
+
+static TesterPhase test_phase = SIGNAL;
 typedef enum 
 {
     MAIN,
-    SELECT_MACRO
+    SELECT_MACRO,
     NAME,
     SELECT_SIGNAL
     SIGNAL,
@@ -23,10 +31,9 @@ typedef enum
 {
     CREATE,
     EDIT,
-    NONE
 } Action;
 
-static Action g_action = NONE;
+static Action g_action = CREATE;
 
 static int g_index = -1;
 static int g_signal_index = -1;
@@ -114,6 +121,22 @@ static void cli_get_input(char* buff, size_t bufflen, const char *prompt)
     trim_str(buff);
 }
 
+static void menu_print_delays()
+{
+    for (int i = 0; i < DELAY_COUNT; i++)
+    {
+        printf("%d) %s", i + 1, g_delays[i].name);
+    }
+}
+
+static void menu_print_keys()
+{
+    for (int i = 0; i < KEY_COUNT; i++)
+    {
+        printf("%d) %s", i + 1, g_keys[i].name);
+    }
+}
+
 static void cli_input_settings(void)
 {
     
@@ -124,22 +147,51 @@ static void cli_settings(void)
     
 }
 
-static void cli_input_tester(void)
+static void menu_input_tester_options(void)
 {
     
+}
+
+static void menu_input_tester(void)
+{
+    char[8] c;
+    cli_get_input(c, sizeof(c), "> ");
+    return cli_to_decimal_2_digit(c);
 }
 
 static void cli_tester(void)
 {
-    puts("===== KEY TESTER =====");
-    puts("Used to see functionality of key and teluje delays.");
-    
-    //print key values
-    
-    puts("Type the key index and delay index to test a key.");
-    puts("Type 'b' to go back.");
+    switch (test_phase)
+    {
+        int key_index = -1;
+        int delay_index = -1;
+        case SIGNAL:
+            puts("===== KEY TESTER =====");
+            puts("Used to see functionality of key and tune delays.");
+            menu_print_keys();
+            puts("Type the key index if the key you want to test.");
+            key_index = menu_input_tester();
+            break;
+        case DELAY:
+            puts("===== KEY TESTER =====");
+            puts("Used to see functionality of key and tune delays.");
+            menu_print_delays();
+            puts("Type the delay index if the key you want to test.");
+            delay_index = menu_input_tester();
+            break;
+        case TESTER:
+            puts("===== KEY TESTER =====");
+            printf("Testing %s with delay %s.", g_keys[key_index].name, g_delay[delay_index].name);
+            puts("Type 'p' to play key.");
+            puts("Type 'd' to edit delay.");
+            puts("Type 'r' to reset and pick new key and delay.");
+            puts("Type 'q' to quit.");
+            // have the same type or inout context here or a similar one. 
+            menu_input_tester_options();
+            break;
 }
 
+// I want some sort of struct to hold the macro index, signal index, key and delay so i can pass one parameter and remove the globals. 
 static void menu_input_delay(void)
 {
     char c[8];
@@ -155,17 +207,19 @@ static void menu_input_delay(void)
     if (n < DELAY_COUNT && n >= 0)
     {
         macros_set_delay(g_index, g_signal_index, g_delays[n].code);
+        cli_set_state(prev_state);
+    }
+    else
+    {
+        puts("Invalid delay.");
+        menu_input_delay();
     }
 }
 
 static void menu_delay(void)
 {
     puts("===== DELAYS =====");
-    for (int i = 0; i < DELAY_COUNT; i++)
-    {
-        printf("%d) %s", i + 1, g_delays[i].name);
-    }
-    puts("Type 'b' to go back.");
+    menu_print_delays();
 }
 
 static void menu_input_signal(void)
@@ -173,27 +227,23 @@ static void menu_input_signal(void)
     char c[8];
     cli_get_input(c, sizeof(c), "> ");
     
-    if (c[0] == 'b')
-    {
-        menu_set_phase(prev_phase);
-        return;
-    }
-    
     int n = cli_to_decimal_2_digit(c);
     if (n < KEY_COUNT && n >= 0)
     {
         macros_set_key(g_index, g_signal_index, g_keys[n].code);
+        g_edit_phase = DELAY;
+    }
+    else
+    {
+        puts("Invalid signal.");
+        menu_input_signal();
     }
 }
 
 static void menu_signal(void)
 {
     puts("===== SIGNALS =====");
-    for (int i = 0; i < KEY_COUNT; i++)
-    {
-        printf("%d) %s", i + 1, g_keys[i].name);
-    }
-    puts("Type 'b' to go back.");
+    menu_print_keys();
 }
 
 static void menu_input_select_signal(void)
@@ -201,17 +251,17 @@ static void menu_input_select_signal(void)
     char c[8];
     cli_get_input(c, sizeof(c), "> ");
     
-    if (c[0] == 'b')
-    {
-        menu_set_phase(prev_phase);
-        return;
-    }
-    
     int n = cli_to_decimal_2_digit(c);
     
     if (n < g_macros[g_index].length && n >= 0)
     {
         g_signal_index = n;
+        g_edit_phase = SIGNAL;
+    }
+    else 
+    {
+        puts("Invalid signal index try again.");
+        menu_input_select_signal();
     }
 }
 
@@ -220,26 +270,21 @@ static void menu_select_signal(void)
     puts("===== SELECT SIGNAL =====");
     for (int i = 0; i < MACRO_LENGTH; i++)
     {
-        macro_print_signal(g_macro[index].signals[i]);
+        macro_print_signal(g_macro[g_index].signals[i]);
     }
     puts("Type 'a' to add a signal.");
     puts("Type 'i' followed by a valid index to insert.");
-    puts("Type 'b' to go back.");
 }
 
 static coid menu_input_name(void)
 {
     char str[64];
     cli_get_input(str, sizeof(str), "> ");
-    if (str[0] == 'b' && str[1] == '\0')
-    {
-        menu_set_phase(g_prev_phase);
-        return;
-    }
+    
     if (str[0] != '\0')
         g_macros[g_index].name = str;
     }
-    menu_set_phase(SELECT_SIGNAL);
+    g_edit_phase = SELECT_SIGNAL;
 }
 
 static void menu_name(void)
@@ -254,8 +299,7 @@ static void menu_name(void)
         printf("Default Name: MACRO%d", g_num_macros); 
     }
     puts("Type a new name and press Enter.");
-    puts("Press Enter with nothing to keep current (or use default on Create).");
-    puts("Type 'b' to go back."); 
+    puts("Press Enter with nothing to keep current (or use default on Create)."); 
 }
 
 static void menu_input_select_macro(void)
@@ -263,18 +307,12 @@ static void menu_input_select_macro(void)
     char c[8];
     cli_get_input(c, sizeof(c), "> ");
     
-    if (c[0] == 'b')
-    {
-        menu_set_phase(g_prev_phase);
-        return;
-    }
-    
     int index = cli_to_decimal_2_digit(c);
     
     if (index <= g_num_macros && index > 0)
     {
         g_index = index;
-        menu_set_phase(NAME);
+        g_edit_phase = NAME;
     }
     else
     {
@@ -290,7 +328,6 @@ static void menu_select_macro(void)
     {
         printf("%d) %s\n", i + 1, g_macros[i].name);
     }
-    puts("Type 'b' to go back.");
 }
 
 static menu_input_main(void)

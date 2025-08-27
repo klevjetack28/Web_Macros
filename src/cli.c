@@ -24,8 +24,7 @@ typedef enum
     DELAY
 } EditPhase;
 
-static EditPhase g_phase = MAIN;
-static EditOhase g_prev_phase = MAIN;
+static EditPhase g_edit_phase = MAIN;
 
 typedef enum
 {
@@ -197,16 +196,11 @@ static void menu_input_delay(void)
     char c[8];
     cli_get_input(c, sizeof(c), "> ");
     
-    if (c[0] == 'b')
-    {
-        menu_set_phase(prev_phase);
-        return;
-    }
-    
     int n = cli_to_decimal_2_digit(c);
     if (n < DELAY_COUNT && n >= 0)
     {
         macros_set_delay(g_index, g_signal_index, g_delays[n].code);
+        g_edit_phase = MAIN;
         cli_set_state(prev_state);
     }
     else

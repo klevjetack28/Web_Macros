@@ -8,23 +8,24 @@
 
 typedef enum
 {
-    SIGNAL,
-    DELAY,
-    TESTING,
-} TesterPhase;
+    TEST_SIGNAL,
+    TEST_DELAY,
+    TESTING
+} TestPhase;
 
-static TesterPhase test_phase = SIGNAL;
+static TestPhase test_phase = TEST_SIGNAL;
+
 typedef enum 
 {
-    MAIN,
+    EDIT_MAIN,
     SELECT_MACRO,
-    NAME,
-    SELECT_SIGNAL
-    SIGNAL,
-    DELAY
+    EDIT_NAME,
+    SELECT_SIGNAL,
+    EDIT_SIGNAL,
+    EDIT_DELAY
 } EditPhase;
 
-static EditPhase g_edit_phase = MAIN;
+static EditPhase g_edit_phase = EDIT_MAIN;
 
 typedef enum
 {
@@ -38,7 +39,8 @@ static int g_index = -1;
 static int g_signal_index = -1;
 static Macro temp_macro; // used if canceled mid edit copies original into it and if canceled copues original back
 
-typedef enum {
+typedef enum 
+{
     MAIN_MENU,
     USE_MACROS,
     CREATE_EDIT_MACROS,
@@ -52,12 +54,6 @@ static void cli_set_state(CliState s)
 {
     prev_state = state;
     state = s;
-}
-
-static void menu_set_phase(EditPhase p)
-{
-    g_prev_phase = g_phase;
-    g_phase = p;
 }
 
 static int cli_to_decimal_2_digit(const char *buff)
@@ -121,21 +117,27 @@ static void cli_get_input(char* buff, size_t bufflen, const char *prompt)
 
 static void menu_print_delays()
 {
-    for (int i = 0; i < DELAY_COUNT; i++)
+    for (int i = 1; i < DELAY_COUNT; i++)
     {
-        printf("%d) %s", i + 1, g_delays[i].name);
+        printf("%d) %s\n", i + 1, g_delays[i].name);
     }
 }
 
 static void menu_print_keys()
 {
-    for (int i = 0; i < KEY_COUNT; i++)
+    for (int i = 1; i < KEY_COUNT; i++)
     {
-        printf("%d) %s", i + 1, g_keys[i].name);
+        printf("%d) %s\n", i + 1, g_keys[i].name);
     }
 }
 
-static void menu_input_tester_options(void)
+typedef struct
+{
+    int key_index;
+    int delay_index;
+} TesterContext;
+
+static void menu_input_tester_options(TesterContext tester_context)
 {
     char c[8];
     cli_get_input(c, sizeof(c), "> ");
@@ -143,61 +145,63 @@ static void menu_input_tester_options(void)
     switch (c[0])
     {
         case 'p':
-            ecp_keypress(g_keys[key_index].name);
-            sleep(g_delay[delay_index].seconds);
+            macro_play_single(g_keys[tester_context.key_index].code, g_delays[tester_context.delay_index].code);
             break;
         case 'd':
-            test_phase = DELAY;
+            test_phase = TEST_DELAY;
             break;
         case 'r':
-            test_phase = SIGNAL;
+            test_phase = TEST_SIGNAL;
             break;
         case 'q':
             cli_set_state(MAIN_MENU);
             break;
         default:
             puts("Invalid Input");
-            menu_input_tester_options();
+            menu_input_tester_options(tester_context);
     }
 }
 
-static void menu_input_tester(void)
+static int menu_input_tester(void)
 {
-    char[8] c;
+    char c[8];
     cli_get_input(c, sizeof(c), "> ");
     return cli_to_decimal_2_digit(c);
 }
 
 static void cli_tester(void)
 {
+    TesterContext tester_context;
+    tester_context.key_index = -1;
+    tester_context.delay_index = -1;
+
     switch (test_phase)
     {
-        int key_index = -1;
-        int delay_index = -1;
-        case SIGNAL:
+        case TEST_SIGNAL:
             puts("===== KEY TESTER =====");
             puts("Used to see functionality of key and tune delays.");
             menu_print_keys();
             puts("Type the key index if the key you want to test.");
-            key_index = menu_input_tester();
+            tester_context.key_index = menu_input_tester();
             break;
-        case DELAY:
+        case TEST_DELAY:
             puts("===== KEY TESTER =====");
             puts("Used to see functionality of key and tune delays.");
             menu_print_delays();
             puts("Type the delay index if the key you want to test.");
-            delay_index = menu_input_tester();
+            tester_context.delay_index = menu_input_tester();
             break;
-        case TESTER:
+        case TESTING:
             puts("===== KEY TESTER =====");
-            printf("Testing %s with delay %s.", g_keys[key_index].name, g_delay[delay_index].name);
+            printf("Testing %s with delay %s.", g_keys[tester_context.key_index].name, g_delays[tester_context.delay_index].name);
             puts("Type 'p' to play key.");
             puts("Type 'd' to edit delay.");
             puts("Type 'r' to reset and pick new key and delay.");
             puts("Type 'q' to quit.");
             // have the same type or inout context here or a similar one. 
-            menu_input_tester_options();
+            menu_input_tester_options(tester_context);
             break;
+    }
 }
 
 // I want some sort of struct to hold the macro index, signal index, key and delay so i can pass one parameter and remove the globals. 
@@ -209,9 +213,9 @@ static void menu_input_delay(void)
     int n = cli_to_decimal_2_digit(c);
     if (n < DELAY_COUNT && n >= 0)
     {
-        macros_set_delay(g_index, g_signal_index, g_delays[n].code);
-        g_edit_phase = MAIN;
-        cli_set_state(prev_state);
+        macro_set_delay(g_index, g_signal_index, g_delays[n].code);
+        g_edit_phase = SELECT_SIGNAL;
+        g_num_macros++;
     }
     else
     {
@@ -234,8 +238,9 @@ static void menu_input_signal(void)
     int n = cli_to_decimal_2_digit(c);
     if (n < KEY_COUNT && n >= 0)
     {
-        macros_set_key(g_index, g_signal_index, g_keys[n].code);
-        g_edit_phase = DELAY;
+        printf("%d, %d\n", g_index, g_signal_index);
+        macro_set_key(g_index, g_signal_index, g_keys[n].code);
+        g_edit_phase = EDIT_DELAY;
     }
     else
     {
@@ -257,36 +262,68 @@ static void menu_input_select_signal(void)
     
     int n = cli_to_decimal_2_digit(c);
     
-    if (n < g_macros[g_index].length && n >= 0)
+    if (c[0] == 'd')
     {
-        g_signal_index = n;
-        g_edit_phase = SIGNAL;
+        cli_set_state(prev_state);
+        return;
     }
-    else 
+
+    if (g_action == CREATE)
     {
-        puts("Invalid signal index try again.");
-        menu_input_select_signal();
+        if (n < MACRO_LENGTH && n >= 0)
+        {
+            g_signal_index = n;
+            g_edit_phase = EDIT_SIGNAL;
+        }
+        else
+        {
+            puts("Invalid signal index try again.");
+            menu_input_select_signal();
+        }
+    }
+    else if (g_action == EDIT)
+    {
+        if (n < g_macros[g_index].length && n >= 0)
+        {
+            g_signal_index = n;
+            g_edit_phase = EDIT_SIGNAL;
+        }
+        else 
+        {
+            puts("Invalid signal index try again.");
+            menu_input_select_signal();
+        }
     }
 }
+
 
 static void menu_select_signal(void)
 {
     puts("===== SELECT SIGNAL =====");
     for (int i = 0; i < MACRO_LENGTH; i++)
     {
-        macro_print_signal(g_macro[g_index].signals[i]);
+        if (g_action == CREATE)
+        {
+            printf("%d) %s, %s\n", i, key_name(g_macros[g_num_macros].signals[i].key), delay_name(g_macros[g_num_macros].signals[i].delay));
+        }
+        else if (g_action == EDIT)
+        {
+            printf("%d) %s, %s\n", i, key_name(g_macros[g_index].signals[i].key), delay_name(g_macros[g_index].signals[i].delay));
+        }
     }
+    puts("Type 'd' when done edit/create(ing) macro.");
     puts("Type 'a' to add a signal.");
     puts("Type 'i' followed by a valid index to insert.");
 }
 
-static coid menu_input_name(void)
+static void menu_input_name(void)
 {
     char str[64];
     cli_get_input(str, sizeof(str), "> ");
     
     if (str[0] != '\0')
-        g_macros[g_index].name = str;
+    {
+        strcpy(g_macros[g_index].name, str);
     }
     g_edit_phase = SELECT_SIGNAL;
 }
@@ -294,13 +331,13 @@ static coid menu_input_name(void)
 static void menu_name(void)
 {
     puts("===== SET NAME =====");
-    if (g_macros[index].create)
+    if (g_macros[g_index].created)
     {
-        printf("Current Name: %s", g_macros[g_index].name);
+        printf("Current Name: %s\n", g_macros[g_index].name);
     } 
     else
     {
-        printf("Default Name: MACRO%d", g_num_macros); 
+        printf("Default Name: MACRO%d\n", g_num_macros); 
     }
     puts("Type a new name and press Enter.");
     puts("Press Enter with nothing to keep current (or use default on Create)."); 
@@ -316,7 +353,7 @@ static void menu_input_select_macro(void)
     if (index <= g_num_macros && index > 0)
     {
         g_index = index;
-        g_edit_phase = NAME;
+        g_edit_phase = EDIT_NAME;
     }
     else
     {
@@ -334,7 +371,7 @@ static void menu_select_macro(void)
     }
 }
 
-static menu_input_main(void)
+static void menu_input_main(void)
 {
     char c[8];
     cli_get_input(c, sizeof(c), "> ");
@@ -342,12 +379,13 @@ static menu_input_main(void)
     switch (c[0])
     {
         case 'c':
-            menu_set_phase(NAME);
-            action = CREATE;
+            g_edit_phase = EDIT_NAME;
+            g_action = CREATE;
+            g_index = g_num_macros;
             break;
         case 'e':
-            menu_set_phase(SELECT_MACRO);
-            action = EDIT;
+            g_edit_phase = SELECT_MACRO;
+            g_action = EDIT;
             break;
         case 'b':
             cli_set_state(prev_state);
@@ -368,9 +406,9 @@ static void menu_main(void)
 
 static void cli_create_edit_macros(void)
 {
-    switch (phase)
+    switch (g_edit_phase)
     {
-        case MAIN:
+        case EDIT_MAIN:
             menu_main();
             menu_input_main();
             break;
@@ -378,7 +416,7 @@ static void cli_create_edit_macros(void)
             menu_select_macro();
             menu_input_select_macro();
             break;
-        case NAME:
+        case EDIT_NAME:
             menu_name();
             menu_input_name();
             break;
@@ -386,13 +424,13 @@ static void cli_create_edit_macros(void)
             menu_select_signal();
             menu_input_select_signal();
             break;
-        case SIGNAL:
+        case EDIT_SIGNAL:
             menu_signal();
             menu_input_signal();
             break;
-        case DELAY:
+        case EDIT_DELAY:
             menu_delay();
-            menu_input_delag();
+            menu_input_delay();
             break;
         default:
             puts("SOMETHING WENT WRONG IN CREATE/EDIT MACRO!!!! SEND HELP!!!");
@@ -441,9 +479,6 @@ static void cli_input_menu()
             return;
         case '3':
             cli_set_state(TESTER);
-            return;
-        case '4':
-            cli_set_state(SETTINGS);
             return;
         case '\n':
             break;

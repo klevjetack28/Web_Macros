@@ -5,6 +5,7 @@
 
 typedef enum 
 {
+    KEY_NONE,
     KEY_HOME,
     KEY_REV,
     KEY_FWD,

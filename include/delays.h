@@ -3,6 +3,7 @@
 
 typedef enum
 {
+    DELAY_UNSET,
     DELAY_250,
     DELAY_500,
     DELAY_750,
@@ -29,6 +30,11 @@ extern const DelayEntry g_delays[DELAY_COUNT];
 static inline double delay_seconds(Delay d)
 {
     return g_delays[d].seconds;
+}
+
+static inline const char* delay_name(Delay d)
+{
+    return g_delays[d].name;
 }
 
 #endif // DELAYS_H

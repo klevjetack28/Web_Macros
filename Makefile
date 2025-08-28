@@ -1,6 +1,6 @@
 CC      := gcc
-CFLAGS  := -std=c11 -Wall -Wextra -Iinclude $(shell pkg-config --fsanitize=address --cflags libcurl 2>/dev/null)
-LDFLAGS := $(shell pkg-config --libs libcurl 2>/dev/null)
+CFLAGS  := -std=c11 -Wall -Wextra -Iinclude $(shell pkg-config -fsanitize=address --cflags libcurl 2>/dev/null)
+LDFLAGS := $(shell pkg-config --libs libcurl 2>/dev/null) -fsanitize=address
 # If pkg-config isn't installed, uncomment the next line:
 # LDFLAGS := -lcurl
 

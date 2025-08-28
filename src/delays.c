@@ -1,6 +1,7 @@
 #include "delays.h"
 
 const DelayEntry g_delays[DELAY_COUNT] = {
+    { "Delay_Unset",   DELAY_UNSET, 0.000 },
     { "Delay_250ms",   DELAY_250,   0.250 },
     { "Delay_500ms",   DELAY_500,   0.500 },
     { "Delay_750ms",   DELAY_750,   0.750 },

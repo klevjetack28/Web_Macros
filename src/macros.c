@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "macros.h"
 #include "ecp.h"
@@ -19,6 +20,7 @@ void macro_init(void)
     {
         for (int j = 0; j < MACRO_LENGTH; j++)
         {
+            macro_set(i, j, KEY_NONE, DELAY_UNSET);
         }
     }
 
@@ -33,8 +35,8 @@ void macro_init(void)
     macro_set(0, 7, KEY_SELECT, DELAY_2000);
     macro_set(0, 8, KEY_SELECT, DELAY_500);
     g_macros[0].length = 9;
-    g_macros[0].name = "MACRO 1";
-    g_macros[0].create = true;
+    strcpy(g_macros[0].name, "MACRO0");
+    g_macros[0].created = true;
     g_num_macros++;
     printf("Macro Length Init: %d\n", g_macros[0].length);
 }
@@ -61,9 +63,19 @@ void macro_play(int macro_index)
     for (int i = 0; i < length; i++)
     {
         RokuKey key = g_macros[macro_index].signals[i].key;
+        if (key == KEY_NONE)
+        {
+            continue;
+        }
         ecp_keypress(key_name(key));
         Delay delay = g_macros[macro_index].signals[i].delay;
         sleep(delay_seconds(delay));
         printf("Playing Macro %d, Current Keypress %s, With Delay %f\n", macro_index, key_name(key), delay_seconds(delay));
     }
+}
+
+void macro_play_single(RokuKey key, Delay delay)
+{
+    ecp_keypress(key_name(key));
+    sleep(delay_seconds(delay));
 }

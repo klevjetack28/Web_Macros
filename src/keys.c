@@ -1,6 +1,7 @@
 #include "keys.h"
 
 const RokuKeyEntry g_keys[] = {
+    { "none", KEY_NONE },
     { "home", KEY_HOME },
     { "rev", KEY_REV },
     { "fwd", KEY_FWD },
